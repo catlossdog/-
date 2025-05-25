@@ -1,0 +1,242 @@
+{# football/templates/Comment.html #}
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>球迷讨论区</title>
+    {# 引用你项目中的 CSS 文件 #}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <!-- 自定义讨论区样式 -->
+    <link rel="stylesheet" href="{% static 'css/discussion.css' %}">
+    {# 引用 Bootstrap CSS #}
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    {# 引用 Bootstrap Icons #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        /* 可以添加一些讨论区卡片特有的样式 */
+        .article-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px; /* 卡片之间有间距 */
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; /* Flexbox 布局 */
+            flex-direction: column; /* 垂直布局内容 */
+            height: 100%; /* 确保同一行的卡片高度一致 */
+        }
+        .article-card-body {
+            flex-grow: 1; /* 内容区域占据剩余空间 */
+        }
+         .article-card-footer {
+            display: flex;
+            justify-content: space-between; /* 评论/阅读和点赞按钮左右分布 */
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .like-btn {
+             /* 点赞按钮样式 */
+             white-space: nowrap;
+        }
+        /* 修复之前无效的 HTML 结构，将 live-score div 移到 body 内部 */
+        .live-score { /* 假设这个样式是用于 live-score div 的 */
+             margin-top: 20px;
+             /* 其他样式 */
+         }
+
+    </style>
+        <style>
+            body {
+        /* ... 其他 body 的样式 ... */
+    
+        /* === 添加或修改以下属性 === */
+        background-image: url('{% static "images/OIP.jpg" %}'); /* 替换为你的图片路径 */
+        background-repeat: no-repeat; /* === 关键：禁止背景图平铺 === */
+        background-size: cover; /* === 关键：使背景图覆盖整个容器 === */
+        background-position: center center; /* 使背景图居中 */
+        background-attachment: fixed; /* 可选：使背景图固定，不随页面滚动而滚动 */
+        /* === 确保没有其他 background 简写属性覆盖了上面的设置 === */
+        /* 例如，不要只写 background: url(...) */
+    
+        min-height: 100vh; /* 确保 body 至少有视口那么高，以便背景图能覆盖整个视口 */
+        /* ... 其他 body 的样式 ... */
+        }
+    
+        </style>
+</head>
+<body class="bg-light">
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                {# <img src="{% static 'images/logo.png' %}" alt="足球logo" width="50"> #}
+                <h1>足球文化传播与发展</h1>
+            </div>
+            <ul class="nav-menu">
+                {# 导航链接，使用你习惯的硬编码或拼接方式 #}
+                {# <li><a href="{% url 'culture' %}">足球文化</a></li> #}
+                <li><a href="/home/discuss/">球迷讨论</a></li>
+                <li><a href="/home/battle/">线上约战</a></li>
+                <li><a href="/home/live/">赛事直播</a></li> {# 指向自己 #}
+                <li><a href="/home/bigdata/">赛事大数据</a></li>
+                 {# 主页链接 #}
+                <li><a href="/home/">主页</a></li>
+                 {# 登录/注销链接 (如果你的视图传递了 current_user) #}
+                 {# {% if current_user %}
+                    <li><a href="/">注销 ({{ current_user.nickname }})</a></li>
+                 {% else %}
+                    <li><a href="/">登录</a></li>
+                 {% endif %} #}
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        <div class="discussion-posts">
+            <!-- 标题区优化 -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">最新比赛讨论（共{{ articles|length }}篇）</h2>
+                {# 发表新帖链接 - TODO: 需要创建发帖视图和模板 #}
+                <a href="/home/discuss/create/" class="btn btn-primary"> {# href="#" 占位，待实现发帖功能 #}
+                    <i class="bi bi-pencil-square"></i> 发表新帖
+                </a>
+            </div>
+
+            {# === 文章列表容器 - 使用两列布局 === #}
+            {# 外层不需要 row，由内层循环控制行的开启和结束 #}
+                {% for article in articles %}
+                    {# 使用循环计数器判断是否需要开始新的一行 #}
+                    {% if forloop.counter0|divisibleby:2 %}
+                        {# 如果是第0, 2, 4...个元素，并且不是第一个元素，那么它是新行的第一个元素，需要结束上一行 #}
+                        {% if not forloop.first %}
+                            </div>{# 结束上一行 #}
+                        {% endif %}
+                        <div class="row"> {# 开始新的一行 #}
+                    {% endif %}
+
+                    {# 单个文章卡片列 #}
+                    <div class="col-md-6"> {# 每列占据一半宽度 #}
+                        <a href="/home/discuss/{{ article.id }}/?article_id={{ article.id }}"></a> 
+                        <div class="article-card">
+                             <div class="article-card-body">
+                                {# 文章头部精简 #}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="card-title mb-0">{{ article.topic }}</h5>
+
+                                </div>
+                                <div class="text-muted small mb-2">
+                                    <span>作者：{{ article.author.nickname }}</span>
+                                    <span class="mx-2">•</span>
+                                    <span>{{ article.pub_time|date:"Y-m-d H:i" }}</span>
+                                    {# 移除 category，模型中没有 #}
+                                    {# <span class="mx-2">•</span>
+                                    <span>{{ article.category.name }}</span> #}
+                                </div>
+
+                                <!-- 文章内容优化 -->
+                                <div class="card-text content-preview">
+                                    {{ article.content|striptags|truncatechars:150 }} {# 截断字数可以根据需要调整 #}
+                                </div>
+                             </div>
+
+                            <!-- 交互功能区 -->
+                            <div class="article-card-footer">
+                                <!-- 查看评论/阅读全文链接 - 使用你习惯的基于 ID 的 URL 拼接 -->
+                                {# article_detail 的 URL 模式是 /home/discuss/<int:article_id>/ #}
+                                <a href="/home/discuss/{{ article.id }}/?article_id={{ article.id }}"
+                                   class="text-decoration-none">
+                                    <i class="bi bi-chat-dots"></i>
+                                    评论与详情（{{ article.comments.count }}） {# 使用 related_name.count() 获取评论数 #}
+                                </a>
+
+                                <!-- 点赞按钮 -->
+                                <button class="like-btn btn btn-sm btn-outline-danger"
+                                id="likeBtn_{{ article.id }}"
+                                data-id="{{ article.id }}"
+                                {# data-initial-views="{{ article.likes }}" -- 这里的命名与实际用途不符 #}
+                                >
+                                    ❤ <span class="likes-count">{{ article.likes }}</span>
+                                </button>
+                            </div>
+
+                        </div> {# end match-card #}
+                    </div> {# end col-md-6 #}
+
+                {% empty %}
+                <div class="col-12">
+                    <div class="empty-state text-center py-5">
+                        <i class="bi bi-chat-square-text display-4 text-muted"></i>
+                        <h4 class="mt-3">暂时没有讨论内容</h4>
+                        <p class="text-muted">点击上方按钮发表第一个帖子</p>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {# === 在循环结束后，确保最后一个 row 标签被关闭 === #}
+                {# 只有在 articles 非空时才需要关闭 #}
+                {% if articles %}
+                    </div> {# 结束最后一个 row #}
+                {% endif %}
+                {# ========================================= #}
+
+        </div> {# end discussion-posts #}
+
+        {# 修复之前无效的 HTML 结构，将 live-score div 移到 body 内部 #}
+         <div class="live-score">
+             <div class="match-card" data-league="英超">
+               <span class="team home">曼联</span>
+               <span class="score">2 - 1</span>
+               <span class="team away">曼城</span>
+               <div class="timeline"></div>
+             </div>
+         </div>
+
+    </main>
+
+    {# 引用 Bootstrap JS 和 jQuery #}
+    {# Bootstrap bundle 包含了 Popper #}
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+    <!-- 引入jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('.like-btn').click(function() {
+                const $btn = $(this);  // 缓存当前按钮
+                const currentId = $btn.data('id');  // 从data属性获取ID
+
+                // 发送AJAX请求
+                $.ajax({
+                    url: '/like_article/', // AJAX URL 使用硬编码路径
+                    type: 'POST',
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},  // CSRF保护
+                    data: { 'id': currentId },
+
+                    success: function(data) {
+                        if(data.status === 'success') {
+                            $btn.find('.likes-count').text(data.likes); // 定位按钮内的子元素
+                            // 可选：如果需要点赞后按钮变色等效果
+                            // $btn.toggleClass('active');
+                        } else {
+                           console.error('点赞失败:', data.message);
+                           // 可选：给用户提示
+                           // alert('点赞失败：' + data.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('点赞失败:', status, error);
+                         // 可选：给用户提示
+                        // alert('点赞失败，请稍后重试。');
+                    }
+                });
+            });
+
+        });
+    </script>
+
+
+</body>
+</html>

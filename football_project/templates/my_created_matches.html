@@ -1,0 +1,154 @@
+{# football/templates/my_created_matches.html #}
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我发布的约战 - 足球世界</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        /* 可以添加我发布的约战页特有样式，或者与 my_matches.html 共用部分 */
+        .created-match-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+             /* 使用 flexbox 布局以便将删除按钮放在右侧 */
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+        }
+         .created-match-info {
+             flex-grow: 1; /* 信息区域占据剩余空间 */
+             margin-right: 15px; /* 与按钮之间有间距 */
+         }
+        .created-match-item h5 {
+            margin-bottom: 5px;
+        }
+         .created-match-item p {
+             margin-bottom: 5px;
+         }
+         .created-match-meta {
+             font-size: 0.9rem;
+             color: #666;
+         }
+         .delete-form {
+             margin: 0; /* 移除表单默认 margin */
+             display: inline-block; /* 使表单与其内容内联 */
+         }
+    </style>
+    <style>
+        body {
+    /* ... 其他 body 的样式 ... */
+
+    /* === 添加或修改以下属性 === */
+    background-image: url('{% static "images/OIP.jpg" %}'); /* 替换为你的图片路径 */
+    background-repeat: no-repeat; /* === 关键：禁止背景图平铺 === */
+    background-size: cover; /* === 关键：使背景图覆盖整个容器 === */
+    background-position: center center; /* 使背景图居中 */
+    background-attachment: fixed; /* 可选：使背景图固定，不随页面滚动而滚动 */
+    /* === 确保没有其他 background 简写属性覆盖了上面的设置 === */
+    /* 例如，不要只写 background: url(...) */
+
+    min-height: 100vh; /* 确保 body 至少有视口那么高，以便背景图能覆盖整个视口 */
+    /* ... 其他 body 的样式 ... */
+    }
+
+    </style>
+</head>
+<body class="bg-light">
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <h1>足球文化传播与发展</h1>
+            </div>
+            <ul class="nav-menu">
+                {# 导航链接，使用你习惯的硬编码或拼接方式 #}
+                {# <li><a href="{% url 'culture' %}">足球文化</a></li> #}
+                <li><a href="/home/discuss/">球迷讨论</a></li>
+                <li><a href="/home/battle/">线上约战</a></li>
+
+                <li><a href="/home/live/">赛事直播</a></li> {# 指向自己 #}
+                <li><a href="/home/bigdata/">赛事大数据</a></li>
+
+                 {# 主页链接 #}
+                <li><a href="/home/">主页</a></li>
+                 {# 登录/注销链接 (如果你的视图传递了 current_user) #}
+                 {# {% if current_user %}
+                    <li><a href="/">注销 ({{ current_user.nickname }})</a></li>
+                 {% else %}
+                    <li><a href="/">登录</a></li>
+                 {% endif %} #}
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        <h2 class="mb-4">📅 我发布的约战</h2>
+
+         {# 显示反馈信息 #}
+        {% if request.GET.status %}
+             {# 根据 status 参数使用不同的 alert 样式 #}
+             {% if request.GET.status == 'success' %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                   {{ request.GET.message|default:'操作成功' }}
+                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+             {% elif request.GET.status == 'error' %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ request.GET.message|default:'操作失败' }}
+                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+             {% endif %}
+        {% endif %}
+
+
+        {% if my_created_matches %}
+            <div class="created-match-list">
+                {% for match in my_created_matches %}
+                    <div class="created-match-item">
+                        <div class="created-match-info">
+                             {# 点击信息区域可以跳转到详情页 #}
+                            <a href="/home/battle/my_matches/{{ match.id }}/" class="text-decoration-none text-dark"> {# 链接到详情页，文字颜色用 dark #}
+                                <h5>{{ match.title }}</h5>
+                                 <p>地点：{{ match.location }}</p>
+                                 <p>时间：{{ match.datetime|date:"Y-m-d H:i" }}</p>
+                                 <div class="created-match-meta">
+                                    创建时间：{{ match.created_at|date:"Y-m-d H:i" }}
+                                    <span class="mx-2">•</span>
+                                    报名人数：{{ match.current_players }} / {{ match.required_players }}
+                                 </div>
+                            </a>
+                        </div>
+                        {# 删除按钮 #}
+                        <div>
+                             {# 使用一个小型表单提交 POST 请求进行删除 #}
+                            <form method="post" action="/home/battle/delete/{{ match.id }}/" class="delete-form" onsubmit="return confirm('确定要删除约战活动 “{{ match.title }}” 吗？');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">删除</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                你还没有发布任何约战活动哦！快去 <a href="/home/battle/create/" class="alert-link">创建第一个约战活动</a> 吧。
+            </div>
+        {% endif %}
+
+         <div class="mt-4">
+             <a href="/home/battle/" class="btn btn-secondary">返回约战列表</a>
+         </div>
+
+    </main>
+
+    {# Bootstrap JS #}
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

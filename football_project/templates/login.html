@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}  
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .login-form input[type="text"],
+        .login-form input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+
+        .login-form button[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px; /* 添加一些底部间距 */
+        }
+
+        .login-form button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            text-decoration: none; /* 让注册链接好看一点 */
+        }
+
+        .register-link a {
+            color: #4CAF50;
+        }
+
+        /* 添加错误消息的样式 */
+        .error-message {
+            color: red;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+    </style>
+        <style>
+            body {
+        /* ... 其他 body 的样式 ... */
+    
+        /* === 添加或修改以下属性 === */
+        background-image: url('{% static "images/OIP.jpg" %}'); /* 替换为你的图片路径 */
+        background-repeat: no-repeat; /* === 关键：禁止背景图平铺 === */
+        background-size: cover; /* === 关键：使背景图覆盖整个容器 === */
+        background-position: center center; /* 使背景图居中 */
+        background-attachment: fixed; /* 可选：使背景图固定，不随页面滚动而滚动 */
+        /* === 确保没有其他 background 简写属性覆盖了上面的设置 === */
+        /* 例如，不要只写 background: url(...) */
+    
+        min-height: 100vh; /* 确保 body 至少有视口那么高，以便背景图能覆盖整个视口 */
+        /* ... 其他 body 的样式 ... */
+        }
+    
+        </style>
+</head>
+<body>
+    <div class="container">
+        <form class="login-form" method="post" action="">
+            {% csrf_token %}
+            <h2>登入</h2>
+
+            {% if error_message %}
+                <div class="error-message">{{ error_message }}</div>
+            {% endif %}
+
+            <div>
+                <input type="text" name="username" placeholder="账号" required value="{{ username|default:'' }}">
+            </div>
+            <div>
+                <input type="password" name="password" placeholder="密码" required>
+            </div>
+            <button type="submit">登入</button>
+
+            <div class="register-link">
+                 还没有账号？<a href="register/">立即注册</a>
+            </div>
+
+        </form>
+    </div>
+</body>
+</html>

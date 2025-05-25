@@ -1,0 +1,173 @@
+{# football/templates/my_match_detail.html #}
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ match.title }} 报名详情 - 足球世界</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        /* 可以添加我的约战详情页特有样式 */
+        .match-details-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .match-details-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+         .match-details-card p {
+             margin-bottom: 8px;
+         }
+         .registration-list {
+             margin-top: 30px;
+             padding-top: 20px;
+             border-top: 1px solid #eee;
+         }
+         .registration-list h4 {
+             margin-bottom: 15px;
+         }
+         .participant-item {
+             border: 1px solid #eee;
+             border-radius: 5px;
+             padding: 10px;
+             margin-bottom: 10px;
+             background-color: #f9f9f9;
+         }
+         .participant-info {
+             font-size: 1rem;
+         }
+         .participant-meta {
+             font-size: 0.8rem;
+             color: #666;
+         }
+    </style>
+        <style>
+        body {
+    /* ... 其他 body 的样式 ... */
+
+    /* === 添加或修改以下属性 === */
+    background-image: url('{% static "images/OIP.jpg" %}'); /* 替换为你的图片路径 */
+    background-repeat: no-repeat; /* === 关键：禁止背景图平铺 === */
+    background-size: cover; /* === 关键：使背景图覆盖整个容器 === */
+    background-position: center center; /* 使背景图居中 */
+    background-attachment: fixed; /* 可选：使背景图固定，不随页面滚动而滚动 */
+    /* === 确保没有其他 background 简写属性覆盖了上面的设置 === */
+    /* 例如，不要只写 background: url(...) */
+
+    min-height: 100vh; /* 确保 body 至少有视口那么高，以便背景图能覆盖整个视口 */
+    /* ... 其他 body 的样式 ... */
+    }
+
+    </style>
+</head>
+<body class="bg-light">
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <h1>足球文化传播与发展</h1>
+            </div>
+            <ul class="nav-menu">
+                {# 导航链接，使用你习惯的硬编码或拼接方式 #}
+                {# <li><a href="{% url 'culture' %}">足球文化</a></li> #}
+                <li><a href="/home/discuss/">球迷讨论</a></li>
+                <li><a href="/home/battle/">线上约战</a></li>
+
+                <li><a href="/home/live/">赛事直播</a></li> {# 指向自己 #}
+                <li><a href="/home/bigdata/">赛事大数据</a></li>
+
+                 {# 主页链接 #}
+                <li><a href="/home/">主页</a></li>
+                 {# 登录/注销链接 (如果你的视图传递了 current_user) #}
+                 {# {% if current_user %}
+                    <li><a href="/">注销 ({{ current_user.nickname }})</a></li>
+                 {% else %}
+                    <li><a href="/">登录</a></li>
+                 {% endif %} #}
+            </ul>
+        </nav>
+    </header>
+
+ <main class="container py-4">
+         {# === 添加反馈信息显示 === #}
+        {% if request.GET.status %}
+             {% if request.GET.status == 'success' %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                   {{ request.GET.message|default:'操作成功' }}
+                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+             {% elif request.GET.status == 'error' %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ request.GET.message|default:'操作失败' }}
+                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+             {% endif %}
+        {% endif %}
+        {# ====================== #}
+
+
+        <h2 class="mb-4">📋 约战详情与报名者列表</h2>
+
+        <div class="match-details-card">
+            <h3>{{ match.title }}</h3>
+            <p><strong>地点：</strong> {{ match.location }}</p>
+            <p><strong>时间：</strong> {{ match.datetime|date:"Y-m-d H:i" }}</p>
+            <p><strong>创建者：</strong> {{ match.creator.nickname }}</p>
+            <p><strong>目标人数：</strong> {{ match.required_players }} 人</p>
+            <p><strong>活动详情：</strong></p>
+            <div class="alert alert-info">
+                 {{ match.description|linebreaksbr }} {# 显示详情内容，保留换行 #}
+            </div>
+             {# 可选：当前报名人数统计 #}
+             <p><strong>当前报名人数：</strong> {{ all_registrations|length }} 人</p>
+
+        </div>
+
+        {# 报名者列表 #}
+        <div class="registration-list">
+            <h4>报名者列表 ({{ all_registrations|length }})</h4>
+            {% if all_registrations %}
+                {% for reg in all_registrations %}
+                    <div class="participant-item">
+                        <div class="participant-info">
+                            <strong>{{ reg.name }}</strong> - {{ reg.phone }}
+                        </div>
+                        <div class="participant-meta">
+                             球迷账号: {{ reg.player.account }} (昵称: {{ reg.player.nickname }})
+                             <span class="mx-2">•</span>
+                             报名时间: {{ reg.registered_at|date:"Y-m-d H:i" }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">还没有人报名此约战。</p>
+            {% endif %}
+        </div>
+
+         {# === 根据用户身份显示不同的返回链接 === #}
+         <div class="mt-4">
+             {% if is_creator %}
+                 {# 如果是创建者，返回我发布的列表 #}
+                 <a href="/home/battle/my_matches/created/" class="btn btn-secondary">返回我发布的约战</a>
+             {% else %}
+                 {# 如果是报名者（或仅仅是查看者），返回我报名的列表 #}
+                 <a href="/home/battle/my_matches/" class="btn btn-secondary">返回我的约战列表</a>
+             {% endif %}
+             <a href="/home/battle/" class="btn btn-outline-secondary ms-2">返回约战列表主页</a> {# 添加返回主列表链接 #}
+         </div>
+         {# ==================================== #}
+
+    </main>
+
+
+    {# Bootstrap JS #}
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

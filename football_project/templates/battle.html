@@ -1,0 +1,341 @@
+{# football/templates/battle.html #}
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>线上约战 - 足球世界</title>
+    {# 引用你项目中的 CSS 文件 #}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {# 引用 Bootstrap CSS #}
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+     {# 引用 Bootstrap Icons #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        /* 可以添加一些线上约战页面特有的样式 */
+        .match-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px; /* 卡片之间有间距 */
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; /* Flexbox 布局 */
+            flex-direction: column; /* 垂直布局内容 */
+            height: 100%; /* 确保同一行的卡片高度一致 */
+        }
+        .match-card-body {
+            flex-grow: 1; /* 内容区域占据剩余空间 */
+        }
+        .match-card-footer {
+            display: flex;
+            justify-content: space-between; /* 人数和按钮/状态左右分布 */
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .match-players {
+            font-weight: bold;
+            color: #228B22; /* 足球绿色 */
+        }
+        .match-full {
+             font-weight: bold;
+            color: #dc3545; /* 红色，表示已满 */
+        }
+        .btn-signup {
+             /* 报名按钮样式 */
+             white-space: nowrap; /* 防止按钮文字换行 */
+        }
+         .signed-up-status {
+             color: #198754; /* 绿色，表示已报名 */
+             font-weight: bold;
+             white-space: nowrap;
+         }
+
+    </style>
+        <style>
+            body {
+        /* ... 其他 body 的样式 ... */
+    
+        /* === 添加或修改以下属性 === */
+        background-image: url('{% static "images/OIP.jpg" %}'); /* 替换为你的图片路径 */
+        background-repeat: no-repeat; /* === 关键：禁止背景图平铺 === */
+        background-size: cover; /* === 关键：使背景图覆盖整个容器 === */
+        background-position: center center; /* 使背景图居中 */
+        background-attachment: fixed; /* 可选：使背景图固定，不随页面滚动而滚动 */
+        /* === 确保没有其他 background 简写属性覆盖了上面的设置 === */
+        /* 例如，不要只写 background: url(...) */
+    
+        min-height: 100vh; /* 确保 body 至少有视口那么高，以便背景图能覆盖整个视口 */
+        /* ... 其他 body 的样式 ... */
+        }
+    
+        </style>
+     <style>
+        /* ... (你的现有样式) ... */
+        /* 添加样式以便按钮与标题对齐 */
+        .battle-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             margin-bottom: 20px; /* 或根据需要调整 */
+        }
+
+        /* 添加背景图样式 */
+         body {
+            background-image: url('{% static "images/OIP.jpg" %}'); /* 替换为你的图片路径 */
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            min-height: 100vh;
+         }
+
+    </style>
+</head>
+<body class="bg-light">
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                {# <img src="{% static 'images/logo.png' %}" alt="足球logo" width="50"> #}
+                <h1>足球文化传播与发展</h1>
+            </div>
+            <ul class="nav-menu">
+                {# 导航链接，使用你习惯的硬编码或拼接方式 #}
+                {# <li><a href="{% url 'culture' %}">足球文化</a></li> #}
+                <li><a href="/home/discuss/">球迷讨论</a></li>
+                <li><a href="/home/battle/">线上约战</a></li>
+
+                <li><a href="/home/live/">赛事直播</a></li> {# 指向自己 #}
+                <li><a href="/home/bigdata/">赛事大数据</a></li>
+
+                 {# 主页链接 #}
+                <li><a href="/home/">主页</a></li>
+                 {# 登录/注销链接 (如果你的视图传递了 current_user) #}
+                 {# {% if current_user %}
+                    <li><a href="/">注销 ({{ current_user.nickname }})</a></li>
+                 {% else %}
+                    <li><a href="/">登录</a></li>
+                 {% endif %} #}
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+
+
+        
+        <h2 class="mb-4">⚽ 线上约战列表</h2>
+
+        <div class="battle-header">
+             <div>
+                 {# 使用你习惯的硬编码路径 #}
+                 <a href="/home/battle/create/" class="btn btn-primary me-2">
+                     <i class="bi bi-plus-circle"></i> 创建约战
+                 </a>
+                 <a href="/home/battle/my_matches/" class="btn btn-secondary">
+                     <i class="bi bi-list-ul"></i> 查看我的约战
+                 </a>
+             </div>
+        </div>
+
+        {# 显示反馈信息 #}
+        {% if feedback_message %}
+             {# 根据 feedback_message 的内容判断是成功还是失败，使用不同的 alert 样式 #}
+             {% if "成功" in feedback_message %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                   {{ feedback_message }}
+                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+             {% else %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ feedback_message }}
+                   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+             {% endif %}
+        {% endif %}
+
+
+        <div class="row">
+            {# 循环 match_list_data，每两个为一组 #}
+            {% for data in match_list_data %}
+                 {# 使用循环计数器判断是否需要开始新的一行 #}
+                 {% if forloop.counter0|divisibleby:2 %}
+                    {# 如果是第0, 2, 4...个元素，开始新的一行（除了第一个元素） #}
+                    {% if not forloop.first %}
+                        </div>{# 结束上一行 #}
+                    {% endif %}
+                    <div class="row"> {# 开始新的一行 #}
+                 {% endif %}
+
+                 {# 单个活动卡片 #}
+                 <div class="col-md-6"> {# 每列占据一半宽度 #}
+                     <div class="match-card">
+                         <div class="match-card-body">
+                            <h5 class="card-title">{{ data.match.title }}</h5>
+                            <p class="card-text small text-muted mb-1">地点: {{ data.match.location }}</p>
+                            <p class="card-text small text-muted mb-1">时间: {{ data.match.datetime|date:"Y-m-d H:i" }}</p>
+                            <p class="card-text">{{ data.match.description|truncatechars:150 }}</p>
+                         </div>
+                         <div class="match-card-footer">
+                             <span class="match-players">
+                                 {% if data.is_full %}
+                                     <span class="match-full">人数已满</span>
+                                 {% else %}
+                                     {{ data.current_players }} / {{ data.match.required_players }} 人已报名
+                                 {% endif %}
+                             </span>
+
+                             {# 报名按钮或状态显示 #}
+                             {% if data.is_signed_up %}
+                                 <span class="signed-up-status"><i class="bi bi-check-circle-fill"></i> 已报名</span>
+                             {% elif data.is_creator %}
+                                <span class="text-muted small">由您创建</span>
+
+                             {% elif data.is_full %}
+                                  {# 人数已满，显示人数已满，不显示按钮 #}
+                                  {# 已经在 match-players span 里显示了，这里不再重复 #}
+                             {% else %}
+                                 {# 用户未报名且未满，显示报名按钮 #}
+                                 <button type="button"
+                                         class="btn btn-success btn-sm btn-signup"
+                                         data-bs-toggle="modal"
+                                         data-bs-target="#signupModal"
+                                         data-match-id="{{ data.match.id }}">
+                                     立即报名
+                                 </button>
+                             {% endif %}
+                         </div>
+                     </div>
+                 </div>
+
+                 {# 使用循环计数器判断是否是最后一个元素，如果不是，则让下一个元素开始新的一行 #}
+                 {% if forloop.last and not forloop.counter0|divisibleby:2 %}
+                     </div> {# 如果是最后一个且不是偶数列的最后一个，结束当前行 #}
+                 {% endif %}
+
+            {% empty %}
+                 {# 如果没有活动 #}
+                 <div class="col-12">
+                     <div class="text-center py-5">
+                         <i class="bi bi-calendar-check display-4 text-muted"></i>
+                         <h4 class="mt-3">暂无线上约战活动</h4>
+                         {# 如果有创建活动功能，这里可以加链接 #}
+                     </div>
+                 </div>
+            {% endfor %}
+            {# 确保最后一个 row 标签被关闭，处理 match 数量是奇数的情况 #}
+            {% if match_list_data and not match_list_data|length|divisibleby:2 %}
+                 </div> {# 结束最后一个 row #}
+            {% endif %}
+
+
+        </div> {# 结束初始的 row，虽然内部已经处理了 row 的开启和结束 #}
+
+
+    </main>
+
+    {# 引用 Bootstrap JS 和 jQuery #}
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+    {# jQuery 仅在需要 AJAX 时才需要，这里不是 AJAX 报名，所以不需要 #}
+    {# <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> #}
+
+
+        {# === 报名模态框 === #}
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signupModalLabel">报名约战</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                {# 模态框中的表单，提交到新的报名处理 URL #}
+                <form method="post" action="/home/battle/signup/">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        {# 隐藏字段，用于存储约战 ID #}
+                        <input type="hidden" name="match_id" id="modalMatchId">
+
+                        {# 渲染姓名和电话表单字段 #}
+                        {# signup_form 是视图传递过来的 SignupModalForm 实例 #}
+                        <div class="mb-3">
+                            <label for="{{ signup_form.name.id_for_label }}" class="form-label">{{ signup_form.name.label }}</label>
+                            {{ signup_form.name }}
+                            {% if signup_form.name.errors %}
+                                <div class="text-danger small">{% for error in signup_form.name.errors %}{{ error }}{% endfor %}</div>
+                            {% endif %}
+                        </div>
+                         <div class="mb-3">
+                            <label for="{{ signup_form.phone.id_for_label }}" class="form-label">{{ signup_form.phone.label }}</label>
+                            {{ signup_form.phone }}
+                            {% if signup_form.phone.errors %}
+                                <div class="text-danger small">{% for error in signup_form.phone.errors %}{{ error }}{% endfor %}</div>
+                            {% endif %}
+                        </div>
+
+                         {# 如果表单有非字段错误 #}
+                         {% if signup_form.non_field_errors %}
+                             <div class="alert alert-danger">
+                                 {% for error in signup_form.non_field_errors %}{{ error }}{% endfor %}
+                             </div>
+                         {% endif %}
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="submit" class="btn btn-primary">确认报名</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {# ========================== #}
+
+
+    {# 引用 Bootstrap JS 和 jQuery #}
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+    {# jQuery 是为了方便写 JS，虽然这里只用到简单的 DOM 操作，纯 JS 也可以 #}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // JavaScript 代码，用于在模态框显示前将约战 ID 填充到隐藏字段
+        var signupModal = document.getElementById('signupModal');
+        if (signupModal) {
+            signupModal.addEventListener('show.bs.modal', function (event) {
+                // 触发模态框的按钮
+                var button = event.relatedTarget;
+                // 从按钮的 data-match-id 属性获取约战 ID
+                var matchId = button.getAttribute('data-match-id');
+                // 获取模态框中的隐藏输入框
+                var modalMatchIdInput = signupModal.querySelector('#modalMatchId');
+                // 将约战 ID 设置到隐藏输入框的值
+                if (modalMatchIdInput) {
+                    modalMatchIdInput.value = matchId;
+                }
+
+                // 可选：可以在模态框标题显示约战名称
+                // var modalTitle = signupModal.querySelector('.modal-title');
+                // var matchTitle = button.closest('.match-card').querySelector('.card-title').innerText; // 假设标题在 .card-title 里
+                // if (modalTitle) {
+                //     modalTitle.textContent = '报名约战：' + matchTitle;
+                // }
+            });
+        }
+
+        // 如果需要处理点赞功能，点赞的 jQuery AJAX 代码依然在这里
+        // $(document).ready(function() { ... 点赞代码 ... });
+
+         // 隐藏反馈消息 Alert 的 JS (Bootstrap 5 的 data-bs-dismiss 属性通常已经处理了)
+         // 如果需要手动控制，可以在这里写 JS
+         // var alertElement = document.querySelector('.alert');
+         // if (alertElement) {
+         //     new bootstrap.Alert(alertElement);
+         // }
+
+    </script>
+
+
+</body>
+</html>

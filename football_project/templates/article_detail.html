@@ -1,0 +1,214 @@
+{# football/templates/article_detail.html #}
+{% load static %} {# 如果你在模板中使用了 static 文件，需要加载 #}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.topic }} - 球迷讨论区</title>
+    {# 引用你项目中的 CSS 文件，确保路径正确 #}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/discussion.css' %}"> {# 假设讨论区有自己的样式 #}
+    {# 引用 Bootstrap CSS #}
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+     {# 引用 Bootstrap Icons #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        /* 可以添加一些文章详情页特有的样式 */
+        .article-content {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #228B22; /* 足球绿色边框 */
+            white-space: pre-wrap; /* 保留文本换行和空格 */
+            word-wrap: break-word; /* 长单词换行 */
+        }
+        .comment-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .comment {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .comment-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+         .comment-form {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+    <style>
+        body {
+    /* ... 其他 body 的样式 ... */
+
+    /* === 添加或修改以下属性 === */
+    background-image: url('{% static "images/OIP.jpg" %}'); /* 替换为你的图片路径 */
+    background-repeat: no-repeat; /* === 关键：禁止背景图平铺 === */
+    background-size: cover; /* === 关键：使背景图覆盖整个容器 === */
+    background-position: center center; /* 使背景图居中 */
+    background-attachment: fixed; /* 可选：使背景图固定，不随页面滚动而滚动 */
+    /* === 确保没有其他 background 简写属性覆盖了上面的设置 === */
+    /* 例如，不要只写 background: url(...) */
+
+    min-height: 100vh; /* 确保 body 至少有视口那么高，以便背景图能覆盖整个视口 */
+    /* ... 其他 body 的样式 ... */
+    }
+    </style>
+</head>
+<body class="bg-light">
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <h1>足球文化传播与发展</h1>
+            </div>
+            <ul class="nav-menu">
+                {# 导航链接，使用你习惯的硬编码或拼接方式 #}
+                {# <li><a href="{% url 'culture' %}">足球文化</a></li> #}
+                <li><a href="/home/discuss/">球迷讨论</a></li>
+                <li><a href="/home/battle/">线上约战</a></li>
+
+                <li><a href="/home/live/">赛事直播</a></li> {# 指向自己 #}
+                <li><a href="/home/bigdata/">赛事大数据</a></li>
+
+                 {# 主页链接 #}
+                <li><a href="/home/">主页</a></li>
+                 {# 登录/注销链接 (如果你的视图传递了 current_user) #}
+                 {# {% if current_user %}
+                    <li><a href="/">注销 ({{ current_user.nickname }})</a></li>
+                 {% else %}
+                    <li><a href="/">登录</a></li>
+                 {% endif %} #}
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        <div class="row">
+            <div class="col-md-10 offset-md-1"> {# 使内容居中 #}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        {# 文章标题 #}
+                        <h2 class="card-title">{{ article.topic }}</h2>
+                        {# 文章元信息 #}
+                        <div class="text-muted small mb-3">
+                            <span>作者：{{ article.author.nickname }}</span>
+                            <span class="mx-2">•</span>
+                            <span>{{ article.pub_time|date:"Y-m-d H:i" }}</span>
+                             <span class="mx-2">•</span>
+                            <span>点赞数：{{ article.likes }}</span> {# 显示点赞数 #}
+                        </div>
+
+                        {# 文章内容 #}
+                        <div class="article-content">
+                        {{ article.content|safe }} 
+                        </div>
+
+                         <!-- {# 可选：点赞按钮（如果希望详情页也能点赞） #}
+                         {# 这个需要额外的 AJAX/JS 来实现，与列表页类似 #}
+                         {# <div class="mt-3">
+                             <button class="like-btn btn btn-outline-danger btn-sm"
+                                     data-id="{{ article.id }}"
+                                     data-initial-views="{{ article.likes }}">
+                                 ❤ <span class="likes-count">{{ article.likes }}</span>
+                             </button>
+                         </div> #} -->
+
+                    </div>
+                </div>
+
+                {# 评论区 #}
+                <div class="comment-section">
+                    <h3>评论 ({{ comments|length }})</h3>
+
+                    {# 显示非字段错误 (如评论内容为空) #}
+                     {% if error_message %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error_message }}
+                        </div>
+                    {% endif %}
+
+                    {# 评论列表 #}
+                    {% if comments %}
+                        {% for comment in comments %}
+                            <div class="comment">
+                                <div class="comment-meta">
+                                    <span>{{ comment.commenter.nickname }}</span>
+                                    <span class="mx-2">•</span>
+                                    <span>{{ comment.comment_time|date:"Y-m-d H:i" }}</span>
+                                </div>
+                                <div class="comment-content">
+                                    {{ comment.content|linebreaksbr }} {# 使用 linebreaksbr 过滤器显示换行符 #}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>还没有评论，快来发表第一个评论吧！</p>
+                    {% endif %}
+
+                </div>
+
+                {# 发表评论表单 #}
+                <div class="comment-form">
+                    <h4>发表你的评论</h4>
+                    {# 表单提交到当前 URL #}
+                    <form method="post" action=".">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="commentContent" class="form-label">评论内容</label>
+                            <textarea class="form-control" id="commentContent" name="comment_content" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">发表评论</button>
+                    </form>
+                </div>
+
+            </div> {# end col #}
+        </div> {# end row #}
+    </main>
+
+    {# 引用 Bootstrap JS 和 jQuery (如果需要点赞功能) #}
+    {# Bootstrap bundle 包含了 Popper #}
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+    {# 如果你想在详情页也实现点赞 AJAX，需要引入 jQuery #}
+    {# <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> #}
+    {# 详情页点赞的 JS 逻辑（如果实现的话） #}
+    {# <script>
+        $(document).ready(function() {
+            $('.like-btn').click(function() {
+                const $btn = $(this);
+                const currentId = $btn.data('id');
+
+                $.ajax({
+                    url: '{% url "like_article" %}', // 使用 URL name
+                    type: 'POST',
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    data: { 'id': currentId },
+                    success: function(data) {
+                        if(data.status === 'success') {
+                            $btn.find('.likes-count').text(data.likes);
+                            // 可选：添加 active 类改变按钮样式
+                            // $btn.toggleClass('active');
+                        } else {
+                           console.error('点赞失败:', data.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('点赞失败:', status, error);
+                        // 可选：给用户提示
+                        // alert('点赞失败，请稍后重试。');
+                    }
+                });
+            });
+        });
+    </script> #}
+
+</body>
+</html>
